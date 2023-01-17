@@ -26,4 +26,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableApolloConfig(value = "application", order = 10)
 public class AppConfig {
+
+    private String abc;
+
+    public String getAbc() {
+        return abc;
+    }
+
+    public void setAbc(String abc) {
+        System.err.println(this.abc + ":" + abc);
+        this.abc = abc;
+    }
 }

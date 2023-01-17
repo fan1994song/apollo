@@ -99,6 +99,10 @@ public class ConfigServiceAutoConfiguration {
       this.configService = configService;
     }
 
+    /**
+     * 注册上的消息监听
+     * @return
+     */
     @Bean
     public ReleaseMessageScanner releaseMessageScanner() {
       ReleaseMessageScanner releaseMessageScanner = new ReleaseMessageScanner();

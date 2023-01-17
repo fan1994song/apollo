@@ -69,6 +69,9 @@ public class ReleaseController {
     this.userInfoHolder = userInfoHolder;
   }
 
+  /**
+   * 发布
+   */
   @PreAuthorize(value = "@permissionValidator.hasReleaseNamespacePermission(#appId, #namespaceName, #env)")
   @PostMapping(value = "/apps/{appId}/envs/{env}/clusters/{clusterName}/namespaces/{namespaceName}/releases")
   public ReleaseDTO createRelease(@PathVariable String appId,
@@ -85,6 +88,7 @@ public class ReleaseController {
 
     ReleaseDTO createdRelease = releaseService.publish(model);
 
+    // 配置推送事件
     ConfigPublishEvent event = ConfigPublishEvent.instance();
     event.withAppId(appId)
         .withCluster(clusterName)

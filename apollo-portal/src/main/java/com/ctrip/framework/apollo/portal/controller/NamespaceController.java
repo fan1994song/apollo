@@ -203,6 +203,13 @@ public class NamespaceController {
     return BeanUtils.transform(AppNamespaceDTO.class, appNamespace);
   }
 
+  /**
+   * 创建应用名称
+   * @param appId
+   * @param appendNamespacePrefix
+   * @param appNamespace
+   * @return
+   */
   @PreAuthorize(value = "@permissionValidator.hasCreateAppNamespacePermission(#appId, #appNamespace)")
   @PostMapping("/apps/{appId}/appnamespaces")
   public AppNamespace createAppNamespace(@PathVariable String appId,
@@ -215,11 +222,12 @@ public class NamespaceController {
 
     AppNamespace createdAppNamespace = appNamespaceService.createAppNamespaceInLocal(appNamespace, appendNamespacePrefix);
 
+    // portal保存
     if (portalConfig.canAppAdminCreatePrivateNamespace() || createdAppNamespace.isPublic()) {
       namespaceService.assignNamespaceRoleToOperator(appId, appNamespace.getName(),
           userInfoHolder.getUser().getUserId());
     }
-
+    // 发送事件监听
     publisher.publishEvent(new AppNamespaceCreationEvent(createdAppNamespace));
 
     return createdAppNamespace;

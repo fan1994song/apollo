@@ -77,6 +77,21 @@ public class ConfigController {
     this.gson = gson;
   }
 
+  /**
+   * 查询配置，提供的配置读取接口
+   * @param appId
+   * @param clusterName
+   * @param namespace
+   * @param dataCenter
+   * @param clientSideReleaseKey
+   * @param clientIp
+   * @param clientLabel
+   * @param messagesAsString
+   * @param request
+   * @param response
+   * @return
+   * @throws IOException
+   */
   @GetMapping(value = "/{appId}/{clusterName}/{namespace:.+}")
   public ApolloConfig queryConfig(@PathVariable String appId, @PathVariable String clusterName,
                                   @PathVariable String namespace,

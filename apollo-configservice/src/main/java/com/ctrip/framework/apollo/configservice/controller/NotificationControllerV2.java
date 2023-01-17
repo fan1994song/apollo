@@ -70,6 +70,13 @@ import java.util.function.Function;
 @RequestMapping("/notifications/v2")
 public class NotificationControllerV2 implements ReleaseMessageListener {
   private static final Logger logger = LoggerFactory.getLogger(NotificationControllerV2.class);
+
+  /**
+   * Watch Key 与 DeferredResultWrapper 的 Multimap
+   *
+   * Key：Watch Key
+   * Value：DeferredResultWrapper 数组
+   */
   private final Multimap<String, DeferredResultWrapper> deferredResults =
       Multimaps.synchronizedSetMultimap(TreeMultimap.create(String.CASE_INSENSITIVE_ORDER, Ordering.natural()));
   private static final Splitter STRING_SPLITTER =
@@ -78,6 +85,9 @@ public class NotificationControllerV2 implements ReleaseMessageListener {
       new TypeToken<List<ApolloConfigNotification>>() {
       }.getType();
 
+  /**
+   * 大量通知分批执行 ExecutorService
+   */
   private final ExecutorService largeNotificationBatchExecutorService;
 
   private final WatchKeysUtil watchKeysUtil;
@@ -105,6 +115,15 @@ public class NotificationControllerV2 implements ReleaseMessageListener {
     this.bizConfig = bizConfig;
   }
 
+  /**
+   * 投票通知
+   * @param appId
+   * @param cluster
+   * @param notificationsAsString
+   * @param dataCenter
+   * @param clientIp
+   * @return
+   */
   @GetMapping
   public DeferredResult<ResponseEntity<List<ApolloConfigNotification>>> pollNotification(
       @RequestParam(value = "appId") String appId,
@@ -286,7 +305,7 @@ public class NotificationControllerV2 implements ReleaseMessageListener {
     ApolloConfigNotification configNotification = new ApolloConfigNotification(changedNamespace, message.getId());
     configNotification.addMessage(content, message.getId());
 
-    //do async notification if too many clients
+    //do async notification if too many clients 如果客户端太多，则执行异步通知
     if (results.size() > bizConfig.releaseMessageNotificationBatch()) {
       largeNotificationBatchExecutorService.submit(() -> {
         logger.debug("Async notify {} clients for key {} with batch {}", results.size(), content,
@@ -300,6 +319,9 @@ public class NotificationControllerV2 implements ReleaseMessageListener {
             }
           }
           logger.debug("Async notify {}", results.get(i));
+          /**
+           * 设置配置通知结果
+           */
           results.get(i).setResult(configNotification);
         }
       });
@@ -314,6 +336,9 @@ public class NotificationControllerV2 implements ReleaseMessageListener {
     logger.debug("Notification completed");
   }
 
+  /**
+   * 通过 ReleaseMessage 的消息内容，获得对应 Namespace 的名字
+   */
   private static final Function<String, String> retrieveNamespaceFromReleaseMessage =
       releaseMessage -> {
         if (Strings.isNullOrEmpty(releaseMessage)) {

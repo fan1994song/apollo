@@ -30,6 +30,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 各种监听
+ */
 @Component
 public class CreationListener {
 
